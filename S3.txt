@@ -1,0 +1,313 @@
+**********Ass3 = Q1. The Product class is currently responsible for both holding product information and 
+calculating tax. Refactor the code by separating these responsibilities into distinct classes, 
+ensuring that each class has only one responsibility. *************
+➔1.product.java = 
+public class Product { 
+    private String name; 
+    private double price; 
+    public Product(String name, double price) { 
+        this.name = name; 
+        this.price = price; 
+    } 
+ 
+    public String getName() { 
+        return name; 
+    } 
+    public double getPrice() { 
+        return price; 
+    } 
+    @Override 
+    public String toString() { 
+        return "Product{name='" + name + "', price=" + price + "}"; 
+    } } 
+2.taxcalculator.java = 
+public class TaxCalculator { 
+    private static final double TAX_RATE = 0.2;  // 20% tax rate 
+    public double calculateTax(Product product) { 
+        return product.getPrice() * TAX_RATE; 
+    } 
+    public double calculateTotalPrice(Product product) { 
+        return product.getPrice() + calculateTax(product); 
+    } } 
+3.Refractorcodedemo.java = 
+import java.util.Scanner; 
+public class RefactoredCodeDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        System.out.print("Enter product name: "); 
+        String name = scanner.nextLine(); 
+        System.out.print("Enter product price: "); 
+        double price = scanner.nextDouble(); 
+        Product product = new Product(name, price); 
+        TaxCalculator taxCalculator = new TaxCalculator(); 
+        System.out.println("Product Information: " + product); 
+        double tax = taxCalculator.calculateTax(product); 
+        double totalPrice = taxCalculator.calculateTotalPrice(product); 
+        System.out.println("Tax: " + tax); 
+        System.out.println("Total Price: " + totalPrice); 
+        scanner.close(); 
+    } } 
+ 
+**********Q2. Refactor the ShapeCalculator that calculates areas for Circle and Rectangle. Allow it to support 
+new shapes (like Triangle) without modifying the existing code. Make it easy to add future shapes. ***********
+➔1.interface shape = 
+public interface Shape { 
+    double calculateArea(); 
+} 
+2.triangle.java = 
+public class Triangle implements Shape { 
+  private double base; 
+  private double height; 
+  public Triangle(double base, double height) { 
+      this.base = base; 
+      this.height = height; 
+  } 
+  @Override 
+  public double calculateArea() { 
+      return 0.5 * base * height; 
+  } } 
+3.rectangle.java = 
+public class Rectangle implements Shape { 
+  private double width; 
+  private double height; 
+  public Rectangle(double width, double height) { 
+      this.width = width; 
+      this.height = height; 
+  } 
+  @Override 
+  public double calculateArea() { 
+      return width * height; 
+  } } 
+4.circle.java = 
+public class Circle implements Shape { 
+ private double radius; 
+ 
+ public Circle(double radius) { 
+     this.radius = radius; 
+ } 
+ @Override 
+ public double calculateArea() { 
+     return Math.PI * radius * radius; 
+ } } 
+5.shapefactory.java = 
+public class ShapeFactory { 
+    public Shape getShape(String shapeType, double... dimensions) { 
+        if (shapeType == null) { 
+            return null; 
+        } 
+        switch (shapeType.toLowerCase()) { 
+            case "circle": 
+                return new Circle(dimensions[0]); 
+            case "rectangle": 
+                return new Rectangle(dimensions[0], dimensions[1]); 
+            case "triangle": 
+                return new Triangle(dimensions[0], dimensions[1]); 
+            default: 
+                return null; 
+        } } } 
+6.shapecalculator.java =  
+import java.util.Scanner; 
+public class ShapeCalculator { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        ShapeFactory shapeFactory = new ShapeFactory(); 
+        while (true) { 
+            System.out.println("Choose a shape to calculate its area:"); 
+            System.out.println("1. Circle"); 
+            System.out.println("2. Rectangle"); 
+            System.out.println("3. Triangle"); 
+            System.out.println("4. Exit"); 
+            System.out.print("Your choice: "); 
+            int choice = scanner.nextInt(); 
+            Shape shape = null; 
+            switch (choice) { 
+                case 1: 
+                    System.out.print("Enter the radius of the Circle: "); 
+                    double radius = scanner.nextDouble(); 
+                    shape = shapeFactory.getShape("circle", radius); 
+                    break; 
+                case 2: 
+                    System.out.print("Enter the width of the Rectangle: "); 
+                    double width = scanner.nextDouble(); 
+                    System.out.print("Enter the height of the Rectangle: "); 
+                    double height = scanner.nextDouble(); 
+                    shape = shapeFactory.getShape("rectangle", width, height); 
+                    break; 
+                case 3: 
+                    System.out.print("Enter the base of the Triangle: "); 
+                    double base = scanner.nextDouble(); 
+                    System.out.print("Enter the height of the Triangle: "); 
+                    double triHeight = scanner.nextDouble(); 
+                    shape = shapeFactory.getShape("triangle", base, triHeight); 
+                    break; 
+                case 4: 
+                    System.out.println("Exiting..."); 
+                    scanner.close(); 
+                    return; 
+                default: 
+                    System.out.println("Invalid choice! Please select again."); 
+            } 
+            if (shape != null) { 
+                System.out.println("The area is: " + shape.calculateArea()); 
+            } } } } 
+ 
+ 
+ 
+***************Q3. The SavingsAccount class alters how interest is calculated compared to the Account class, 
+breaking the Liskov Substitution Principle (LSP). Refactor the code so that SavingsAccount can 
+replace Account without affecting functionality. Keep interest calculation logic uniform for all 
+account types. ****************
+➔1.account.java = 
+public class Account { 
+    private String accountNumber; 
+    private double balance; 
+    protected InterestStrategy interestStrategy; 
+    public Account(String accountNumber, double balance, InterestStrategy interestStrategy) { 
+        this.accountNumber = accountNumber; 
+        this.balance = balance; 
+        this.interestStrategy = interestStrategy; 
+    } 
+    public double calculateInterest() { 
+        return interestStrategy.calculateInterest(balance); 
+    } } 
+2.accountdemo.java = 
+import java.util.Scanner; 
+public class AccountDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        Account account = null; 
+        while (true) { 
+            System.out.println("Choose account type to create:"); 
+            System.out.println("1. Regular Account"); 
+            System.out.println("2. Savings Account"); 
+            System.out.println("3. Exit"); 
+            System.out.print("Your choice: "); 
+            int choice = scanner.nextInt(); 
+            if (choice == 3) { 
+                break; 
+            } 
+            System.out.print("Enter account number: "); 
+            String accountNumber = scanner.next(); 
+            System.out.print("Enter initial balance: "); 
+            double balance = scanner.nextDouble(); 
+            switch (choice) { 
+                case 1: 
+                    account = new Account(accountNumber, balance, new RegularInterestStrategy()); 
+                    break; 
+                case 2: 
+                    account = new SavingsAccount(accountNumber, balance); 
+                    break; 
+                default: 
+                    System.out.println("Invalid choice! Please select again."); 
+                    continue; 
+            } 
+ 
+            System.out.println("Account created: " + accountNumber); 
+            System.out.println("Initial balance: " + balance); 
+            System.out.println("Calculated interest: " + account.calculateInterest()); 
+        } 
+        scanner.close(); 
+    } } 
+3.interface intereststratergy = 
+public interface InterestStrategy { 
+    double calculateInterest(double balance); 
+} 
+4.regularintereststatergy = 
+public class RegularInterestStrategy implements InterestStrategy { 
+ @Override 
+ public double calculateInterest(double balance) { 
+     return balance * 0.02;   
+ } } 
+5.savingaccount.java = 
+public class SavingsAccount extends Account { 
+    public SavingsAccount(String accountNumber, double balance) { 
+        super(accountNumber, balance, new SavingsInterestStrategy()); 
+    } } 
+6.savingintreststatergy.java = 
+public class SavingsInterestStrategy implements InterestStrategy { 
+  @Override 
+  public double calculateInterest(double balance) { 
+      return balance * 0.03;   
+  } } 
+ 
+********* Q4. Refactor the TaskManager interface, which has methods like createTask(),deleteTask(), 
+assignTask(), and markTaskAsComplete(). Break it into smaller interfaces: TaskCreation, 
+TaskAssignment, and TaskCompletion. Ensure classes only implement the interfaces they actually 
+need. ************
+➔1.interface taskassignment = 
+public interface TaskAssignment { 
+    void assignTask(String taskName, String assignee); 
+} 
+2.interface taskcomplition = 
+public interface TaskCompletion { 
+    void markTaskAsComplete(String taskName); 
+    void deleteTask(String taskName); 
+} 
+3.interface taskcreation = 
+public interface TaskCreation { 
+    void createTask(String taskName); 
+} 
+4.taskmanager.java = 
+public class TaskManager implements TaskCreation, TaskAssignment, TaskCompletion { 
+    @Override 
+    public void createTask(String taskName) { 
+        System.out.println("Task created: " + taskName); 
+    } 
+    @Override 
+    public void assignTask(String taskName, String assignee) { 
+        System.out.println("Task assigned: " + taskName + " to " + assignee); 
+    } 
+    @Override 
+    public void markTaskAsComplete(String taskName) { 
+        System.out.println("Task marked as complete: " + taskName); 
+    } 
+    @Override 
+    public void deleteTask(String taskName) { 
+        System.out.println("Task deleted: " + taskName); 
+    } } 
+5.taskmanagerdemo.java = 
+import java.util.Scanner; 
+public class TaskManagerDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        TaskManager taskManager = new TaskManager(); 
+        while (true) { 
+            System.out.println("Choose an action:"); 
+            System.out.println("1. Create Task"); 
+            System.out.println("2. Assign Task"); 
+            System.out.println("3. Mark Task as Complete"); 
+            System.out.println("4. Delete Task"); 
+            System.out.println("5. Exit"); 
+            System.out.print("Your choice: "); 
+            int choice = scanner.nextInt(); 
+            scanner.nextLine();  
+            switch (choice) { 
+                case 1: 
+                    System.out.print("Enter task name: "); 
+                    String taskName = scanner.nextLine(); 
+                    taskManager.createTask(taskName); 
+                    break; 
+                case 2: 
+                    System.out.print("Enter task name: "); 
+                    taskName = scanner.nextLine(); 
+                    System.out.print("Enter assignee: "); 
+                    String assignee = scanner.nextLine(); 
+                    taskManager.assignTask(taskName, assignee); 
+                    break; 
+                case 3: 
+                    System.out.print("Enter task name: "); 
+                    taskName = scanner.nextLine(); 
+                    taskManager.markTaskAsComplete(taskName); 
+                    break; 
+                case 4: 
+                    System.out.print("Enter task name: "); 
+                    taskName = scanner.nextLine(); 
+                    taskManager.deleteTask(taskName); 
+                    break; 
+                case 5: 
+                    System.out.println("Exiting..."); 
+                    scanner.close(); 
+                    return; 
+                default: 
+                    System.out.println("Invalid choice! Please select again."); 
+            } } } }
