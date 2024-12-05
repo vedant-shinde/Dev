@@ -1,0 +1,223 @@
+******Ass2 =Q1.Create a Java class DatabaseConnection using the Singleton design pattern. The class 
+should have a method getConnection() that returns a single instance of the connection. Ensure 
+that only one instance of DatabaseConnection is created even if multiple threads try to access it. ***************
+➔1.DatabaseConnection.java = 
+public class DatabaseConnection { 
+    private static DatabaseConnection instance; 
+    private static Object mutex = new Object(); 
+    private DatabaseConnection() { 
+    } 
+    public static DatabaseConnection getInstance() { 
+        if (instance == null) { 
+            synchronized (mutex) { 
+                if (instance == null) { 
+                    instance = new DatabaseConnection(); 
+                } } } 
+        return instance; 
+    } 
+    public void connect() { 
+        System.out.println("Connecting to the database..."); 
+    } 
+    public void disconnect() { 
+        System.out.println("Disconnecting from the database..."); 
+    } } 
+2.singletondemo.java =  
+import java.util.Scanner; 
+public class SingletonDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        DatabaseConnection connection = null; 
+        while (true) { 
+            System.out.println("Choose an action:"); 
+            System.out.println("1. Get Database Connection"); 
+            System.out.println("2. Connect to Database"); 
+            System.out.println("3. Disconnect from Database"); 
+            System.out.println("4. Exit"); 
+            System.out.print("Your choice: "); 
+            int choice = scanner.nextInt(); 
+            switch (choice) { 
+                case 1: 
+                    connection = DatabaseConnection.getInstance(); 
+                    System.out.println("Database connection instance obtained."); 
+                    break; 
+                case 2: 
+                    if (connection != null) { 
+                        connection.connect(); 
+                    } else { 
+                        System.out.println("No connection instance found. Obtain it first."); 
+                    } 
+                    break; 
+                case 3: 
+                    if (connection != null) { 
+                        connection.disconnect(); 
+                    } else { 
+                        System.out.println("No connection instance found. Obtain it first."); 
+                    } 
+                    break; 
+                case 4: 
+                    System.out.println("Exiting..."); 
+                    scanner.close(); 
+                    return; 
+                default: 
+                    System.out.println("Invalid choice! Please select again."); 
+            } } } } 
+ 
+*********Q2.Implement a VehicleFactory class in Java using the Factory Method design pattern. The factory 
+should be able to create objects of Car and Bike classes based on the input provided. *************
+➔1.interface vehicle = 
+public interface Vehicle { 
+    void drive(); 
+} 
+2.bike.java = 
+public class Bike implements Vehicle { 
+    @Override 
+    public void drive() { 
+        System.out.println("Bike is driving"); 
+    } 
+} 
+3.car.java = 
+public class Car implements Vehicle { 
+    @Override 
+    public void drive() { 
+        System.out.println("Car is driving"); 
+    } 
+} 
+4.bikefactory.java = 
+class BikeFactory extends VehicleFactory { 
+    @Override 
+    public Vehicle createVehicle() { 
+        return new Bike(); 
+    } 
+} 
+5.carfactory.java = 
+class CarFactory extends VehicleFactory { 
+    @Override 
+    public Vehicle createVehicle() { 
+        return new Car(); 
+    } 
+} 
+6.vehiclefactory.java = 
+public abstract class VehicleFactory { 
+    public abstract Vehicle createVehicle(); 
+    public static VehicleFactory getFactory(String type) { 
+        if (type.equalsIgnoreCase("Car")) { 
+            return new CarFactory(); 
+        } else if (type.equalsIgnoreCase("Bike")) { 
+            return new BikeFactory(); 
+        } 
+        return null; 
+    } } 
+7.factorymethoddemo.java = 
+import java.util.Scanner; 
+public class FactoryMethodDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        while (true) { 
+            System.out.println("Enter the type of vehicle (Car/Bike) or 'exit' to quit: "); 
+            String input = scanner.nextLine(); 
+            if (input.equalsIgnoreCase("exit")) { 
+                break; 
+            } 
+            VehicleFactory factory = VehicleFactory.getFactory(input); 
+            if (factory != null) { 
+                Vehicle vehicle = factory.createVehicle(); 
+                vehicle.drive(); 
+            } else { 
+                System.out.println("Invalid vehicle type. Please try again."); 
+            } } 
+        scanner.close(); 
+    } } 
+ 
+*******Q3.Implement a Shape interface with a method clone(). Create concrete classes Circle and 
+Rectangle that implement this interface. Use the Prototype pattern to create a new instance of 
+Circle or Rectangle by cloning the existing objects. *************
+➔interface shape = 
+public interface Shape extends Cloneable { 
+    void draw(); 
+    Shape clone(); 
+} 
+ 
+2.rectangle.java = 
+public class Rectangle implements Shape { 
+  private int width; 
+  private int height; 
+  public Rectangle(int width, int height) { 
+      this.width = width; 
+      this.height = height; 
+  } 
+  @Override 
+  public void draw() { 
+      System.out.println("Drawing a Rectangle with width: " + width + " and height: " + height); 
+  } 
+  @Override 
+  public Shape clone() { 
+      try { 
+          return (Shape) super.clone(); 
+      } catch (CloneNotSupportedException e) { 
+          e.printStackTrace(); 
+          return null; 
+              } } } 
+3.circle.java = 
+public class Circle implements Shape { 
+ private int radius; 
+ public Circle(int radius) { 
+     this.radius = radius; 
+ } 
+ @Override 
+ public void draw() { 
+     System.out.println("Drawing a Circle with radius: " + radius); 
+ } 
+ @Override 
+ public Shape clone() { 
+     try { 
+         return (Shape) super.clone(); 
+     } catch (CloneNotSupportedException e) { 
+         e.printStackTrace(); 
+         return null; 
+     } } 
+4.prototypedemo.java = 
+import java.util.Scanner; 
+public class PrototypeDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        Shape shape = null; 
+        Shape clonedShape = null; 
+        while (true) { 
+            System.out.println("Choose a shape to create:"); 
+            System.out.println("1. Circle"); 
+            System.out.println("2. Rectangle"); 
+            System.out.println("3. Clone the last created shape"); 
+            System.out.println("4. Exit"); 
+            System.out.print("Your choice: "); 
+            int choice = scanner.nextInt(); 
+            switch (choice) { 
+                case 1: 
+                    System.out.print("Enter the radius of the Circle: "); 
+                    int radius = scanner.nextInt(); 
+                    shape = new Circle(radius); 
+                    shape.draw(); 
+                    break; 
+                case 2: 
+                    System.out.print("Enter the width of the Rectangle: "); 
+                    int width = scanner.nextInt(); 
+                    System.out.print("Enter the height of the Rectangle: "); 
+                    int height = scanner.nextInt(); 
+                    shape = new Rectangle(width, height); 
+                    shape.draw(); 
+                    break; 
+                case 3: 
+                    if (shape != null) { 
+                        clonedShape = shape.clone(); 
+                        System.out.println("Cloning the last created shape:"); 
+                        clonedShape.draw(); 
+                    } else { 
+                        System.out.println("No shape to clone! Create a shape first."); 
+                    } 
+                    break; 
+                case 4: 
+                    System.out.println("Exiting..."); 
+                    scanner.close(); 
+                    return; 
+                default: 
+                    System.out.println("Invalid choice! Please select again."); 
+            } } } }
