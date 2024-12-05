@@ -1,0 +1,388 @@
+*****Ass1 = Q1. You are given an AudioPlayer class that only plays MP3 files. Extend its functionality to *******
+support playing both MP4 and VLC files by using the Adapter Pattern.  
+➔1.interface MediaPlayer =  
+public interface MediaPlayer { 
+ void play(String audioType, String fileName); 
+} 
+2.Interface AdvanceMediaPlayer = 
+public interface AdvancedMediaPlayer { 
+  void playMp4(String fileName); 
+  void playVlc(String fileName); 
+ } 
+3.VlcPlayer.java = 
+public class VlcPlayer implements AdvancedMediaPlayer { 
+  @Override 
+  public void playMp4(String fileName) { 
+  } 
+  @Override 
+  public void playVlc(String fileName) { 
+      System.out.println("Playing vlc file. Name: " + fileName); 
+  } } 
+4.Mp4Player.java = 
+public class Mp4Player implements AdvancedMediaPlayer { 
+ @Override 
+ public void playMp4(String fileName) { 
+     System.out.println("Playing mp4 file. Name: " + fileName); 
+ } 
+ @Override 
+ public void playVlc(String fileName) { 
+ } } 
+5.MediaAdapter.java =  
+public class MediaAdapter implements MediaPlayer { 
+ AdvancedMediaPlayer advancedMusicPlayer; 
+ public MediaAdapter(String audioType) { 
+     if(audioType.equalsIgnoreCase("mp4")) { 
+         advancedMusicPlayer = new Mp4Player(); 
+     } else if(audioType.equalsIgnoreCase("vlc")) { 
+         advancedMusicPlayer = new VlcPlayer(); 
+     } } 
+ @Override 
+ public void play(String audioType, String fileName) { 
+     if(audioType.equalsIgnoreCase("mp4")) { 
+         advancedMusicPlayer.playMp4(fileName); 
+     } else if(audioType.equalsIgnoreCase("vlc")) { 
+         advancedMusicPlayer.playVlc(fileName); 
+     } } } 
+6.AudioPlayer.java =  
+import java.util.Scanner; 
+public class AudioPlayer implements MediaPlayer { 
+ MediaAdapter mediaAdapter; 
+ @Override 
+ public void play(String audioType, String fileName) { 
+     if(audioType.equalsIgnoreCase("mp3")) { 
+         System.out.println("Playing mp3 file. Name: " + fileName); 
+     } 
+     else if(audioType.equalsIgnoreCase("mp4") || audioType.equalsIgnoreCase("vlc")) { 
+         mediaAdapter = new MediaAdapter(audioType); 
+         mediaAdapter.play(audioType, fileName); 
+     } else { 
+         System.out.println("Invalid media. " + audioType + " format not supported"); 
+     } } 
+ public static void main(String[] args) { 
+     AudioPlayer audioPlayer = new AudioPlayer(); 
+     Scanner scanner = new Scanner(System.in); 
+     System.out.println("Enter audio type (mp3, mp4, vlc): "); 
+     String audioType = scanner.nextLine(); 
+     System.out.println("Enter file name: "); 
+     String fileName = scanner.nextLine(); 
+     audioPlayer.play(audioType, fileName); 
+ } } 
+ 
+**********Q2. Implement a simple system where you have Employee objects. An employee can either be an 
+individual worker or a manager who supervises a team of employees. Use the Composite Pattern 
+to treat both individual employees and managers uniformly in terms of their reporting structure. ********
+➔1.interface Employee = 
+public interface Employee { 
+ void showEmployeeDetails(); 
+} 
+2.Developer.java = 
+public class Developer implements Employee { 
+ private String name; 
+ private String id; 
+ public Developer(String name, String id) { 
+     this.name = name; 
+     this.id = id; 
+ } 
+ @Override 
+ public void showEmployeeDetails() { 
+     System.out.println("Developer [Name: " + name + ", ID: " + id + "]"); 
+ } } 
+3.Manager.java = 
+import java.util.ArrayList; 
+import java.util.List; 
+public class Manager implements Employee { 
+ private String name; 
+ private String id; 
+ private List<Employee> subordinates; 
+ public Manager(String name, String id) { 
+     this.name = name; 
+     this.id = id; 
+     this.subordinates = new ArrayList<>(); 
+ } 
+ public void addEmployee(Employee employee) { 
+     subordinates.add(employee); 
+ } 
+ @Override 
+ public void showEmployeeDetails() { 
+     System.out.println("Manager [Name: " + name + ", ID: " + id + "]"); 
+     for (Employee employee : subordinates) { 
+         employee.showEmployeeDetails(); 
+     } } } 
+4.compositepattern.java =  
+import java.util.Scanner; 
+public class CompositePatternDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        Manager generalManager = new Manager("General Manager", "GM001"); 
+        System.out.print("Enter the number of developers: "); 
+        int numDevelopers = scanner.nextInt(); 
+        scanner.nextLine();  
+        for (int i = 0; i < numDevelopers; i++) { 
+            System.out.print("Enter Developer Name: "); 
+            String devName = scanner.nextLine(); 
+            System.out.print("Enter Developer ID: "); 
+            String devId = scanner.nextLine(); 
+            Developer developer = new Developer(devName, devId); 
+            generalManager.addEmployee(developer); 
+        } 
+        System.out.print("Enter the number of managers: "); 
+        int numManagers = scanner.nextInt(); 
+        scanner.nextLine(); // consume newline 
+        for (int i = 0; i < numManagers; i++) { 
+            System.out.print("Enter Manager Name: "); 
+            String mgrName = scanner.nextLine(); 
+            System.out.print("Enter Manager ID: "); 
+            String mgrId = scanner.nextLine(); 
+            Manager manager = new Manager(mgrName, mgrId); 
+            System.out.print("Enter the number of developers under this manager: "); 
+            int numSubordinates = scanner.nextInt(); 
+            scanner.nextLine(); // consume newline 
+            for (int j = 0; j < numSubordinates; j++) { 
+                System.out.print("Enter Subordinate Developer Name: "); 
+                String subName = scanner.nextLine(); 
+                System.out.print("Enter Subordinate Developer ID: "); 
+                String subId = scanner.nextLine(); 
+                Developer subDeveloper = new Developer(subName, subId); 
+                manager.addEmployee(subDeveloper); 
+            } 
+            generalManager.addEmployee(manager); 
+        } 
+        System.out.println("\nOrganization Structure:"); 
+        generalManager.showEmployeeDetails(); 
+    } } 
+ 
+*******Q3. Develop a Java application where you have different types of shapes (e.g., Circle, Rectangle) 
+and draw implementations (e.g., DrawingAPI1, DrawingAPI2). Use the Bridge pattern to separate 
+shape logic from drawing logic. **********
+➔1.shape.java = 
+public abstract class Shape { 
+    protected DrawingAPI drawingAPI; 
+    protected Shape(DrawingAPI drawingAPI) { 
+        this.drawingAPI = drawingAPI; 
+    } 
+    public abstract void draw(); 
+    public abstract void resizeByPercentage(double pct); 
+} 
+2.DrawingAPI1.java = 
+public class DrawingAPI1 implements DrawingAPI { 
+ @Override 
+ public void drawCircle(double x, double y, double radius) { 
+     System.out.println("API1.circle at (" + x + "," + y + ") with radius " + radius); 
+ } 
+ @Override 
+ public void drawRectangle(double x, double y, double width, double height) { 
+     System.out.println("API1.rectangle at (" + x + "," + y + ") with width " + width + " and height " + 
+height); 
+ } } 
+3.DrawingAPI2.java = 
+public class DrawingAPI2 implements DrawingAPI { 
+  @Override 
+  public void drawCircle(double x, double y, double radius) { 
+      System.out.println("API2.circle at (" + x + "," + y + ") with radius " + radius); 
+  } 
+  @Override 
+  public void drawRectangle(double x, double y, double width, double height) { 
+      System.out.println("API2.rectangle at (" + x + "," + y + ") with width " + width + " and 
+height " + height); 
+  } } 
+4.Rectangleshape.java = 
+public class RectangleShape extends Shape { 
+ private double x, y, width, height; 
+ public RectangleShape(double x, double y, double width, double height, DrawingAPI drawingAPI) { 
+     super(drawingAPI); 
+     this.x = x; 
+     this.y = y; 
+     this.width = width; 
+     this.height = height; 
+ } 
+ @Override 
+ public void draw() { 
+     drawingAPI.drawRectangle(x, y, width, height); 
+ } 
+ @Override 
+ public void resizeByPercentage(double pct) { 
+     width *= (1.0 + pct / 100.0); 
+     height *= (1.0 + pct / 100.0); 
+ } } 
+5.interface DrawingAPI = 
+public interface DrawingAPI { 
+    void drawCircle(double x, double y, double radius); 
+    void drawRectangle(double x, double y, double width, double height); 
+} 
+6.circle.java = 
+public class CircleShape extends Shape { 
+ private double x, y, radius; 
+ public CircleShape(double x, double y, double radius, DrawingAPI drawingAPI) { 
+     super(drawingAPI); 
+     this.x = x; 
+     this.y = y; 
+     this.radius = radius; 
+ } 
+ @Override 
+ public void draw() { 
+     drawingAPI.drawCircle(x, y, radius); 
+ } 
+ @Override 
+ public void resizeByPercentage(double pct) { 
+     radius *= (1.0 + pct / 100.0); 
+ } } 
+7.bridgepatterndemo = 
+import java.util.Scanner; 
+public class BridgePatternDemo { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        System.out.println("Select Drawing API: "); 
+        System.out.println("1. DrawingAPI1"); 
+        System.out.println("2. DrawingAPI2"); 
+        int apiChoice = scanner.nextInt(); 
+        DrawingAPI drawingAPI = (apiChoice == 1) ? new DrawingAPI1() : new DrawingAPI2(); 
+        while (true) { 
+            System.out.println("Select Shape to draw: "); 
+            System.out.println("1. Circle"); 
+            System.out.println("2. Rectangle"); 
+            System.out.println("3. Exit"); 
+            int shapeChoice = scanner.nextInt(); 
+            if (shapeChoice == 3) { 
+                break; 
+            } 
+            Shape shape = null; 
+            switch (shapeChoice) { 
+                case 1: 
+                    System.out.print("Enter x coordinate: "); 
+                    double xCircle = scanner.nextDouble(); 
+                    System.out.print("Enter y coordinate: "); 
+                    double yCircle = scanner.nextDouble(); 
+                    System.out.print("Enter radius: "); 
+                    double radius = scanner.nextDouble(); 
+                    shape = new CircleShape(xCircle, yCircle, radius, drawingAPI); 
+                    break; 
+                case 2: 
+                    System.out.print("Enter x coordinate: "); 
+                    double xRectangle = scanner.nextDouble(); 
+                    System.out.print("Enter y coordinate: "); 
+                    double yRectangle = scanner.nextDouble(); 
+                    System.out.print("Enter width: "); 
+                    double width = scanner.nextDouble(); 
+                    System.out.print("Enter height: "); 
+                    double height = scanner.nextDouble(); 
+                    shape = new RectangleShape(xRectangle, yRectangle, width, height, drawingAPI); 
+                    break; 
+                default: 
+                    System.out.println("Invalid choice! Please try again."); 
+            } 
+            if (shape != null) { 
+                shape.draw(); 
+                System.out.print("Resize by percentage: "); 
+                double pct = scanner.nextDouble(); 
+                shape.resizeByPercentage(pct); 
+                shape.draw(); 
+            } } 
+        scanner.close(); 
+    } } 
+ 
+*******Q4. Create a basic Pizza class in Java and then implement decorators to add different toppings (like 
+cheese, olives, and mushrooms) to the pizza. Each topping should be an additional class that 
+extends a base decorator. ********
+➔1.interface pizza = 
+public interface Pizza { 
+    String getDescription(); 
+    double getCost(); 
+} 
+2.olives.java = 
+public class Olives extends PizzaDecorator { 
+    public Olives(Pizza tempPizza) { 
+        super(tempPizza); 
+    } 
+    @Override 
+    public String getDescription() { 
+        return tempPizza.getDescription() + ", Olives"; 
+    } 
+    @Override 
+    public double getCost() { 
+        return tempPizza.getCost() + 15.0;   
+    } } 
+3.mushrooms.java = 
+public class Mushrooms extends PizzaDecorator { 
+    public Mushrooms(Pizza tempPizza) { 
+        super(tempPizza); 
+    } 
+    @Override 
+    public String getDescription() { 
+        return tempPizza.getDescription() + ", Mushrooms"; 
+    } 
+    @Override 
+    public double getCost() { 
+        return tempPizza.getCost() + 25.0;   
+    } } 
+4.cheese.java = 
+public class Cheese extends PizzaDecorator { 
+    public Cheese(Pizza tempPizza) { 
+        super(tempPizza); 
+    } 
+    @Override 
+    public String getDescription() { 
+        return tempPizza.getDescription() + ", Cheese"; 
+    } 
+    @Override 
+    public double getCost() { 
+        return tempPizza.getCost() + 20.0;   
+    } } 
+5.PizzaDecorator.java = 
+public abstract class PizzaDecorator implements Pizza { 
+    protected Pizza tempPizza; 
+    public PizzaDecorator(Pizza tempPizza) { 
+        this.tempPizza = tempPizza; 
+    } 
+ 
+    @Override 
+    public String getDescription() { 
+        return tempPizza.getDescription(); 
+    } 
+    @Override 
+    public double getCost() { 
+        return tempPizza.getCost(); 
+    } } 
+6.PlanPizza.java = 
+public class PlainPizza implements Pizza { 
+    @Override 
+    public String getDescription() { 
+        return "Plain Pizza"; 
+    } 
+    @Override 
+    public double getCost() { 
+        return 50.0;  
+    } } 
+7.pizzaorder.java = 
+import java.util.Scanner; 
+public class PizzaOrder { 
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        Pizza myPizza = new PlainPizza(); 
+        System.out.println("Plain Pizza selected. Base cost: " + myPizza.getCost()); 
+        while (true) { 
+            System.out.println("Choose a topping to add:"); 
+            System.out.println("1. Cheese"); 
+            System.out.println("2. Olives"); 
+            System.out.println("3. Mushrooms"); 
+            System.out.println("4. Finish"); 
+            System.out.print("Your choice: "); 
+            int choice = scanner.nextInt(); 
+            switch (choice) { 
+                case 1: 
+                    myPizza = new Cheese(myPizza); 
+                    break; 
+                case 2: 
+                    myPizza = new Olives(myPizza); 
+                    break; 
+                case 3: 
+                    myPizza = new Mushrooms(myPizza); 
+                    break; 
+                case 4: 
+                    System.out.println("Order complete!"); 
+                    System.out.println("Description: " + myPizza.getDescription()); 
+                    System.out.println("Total cost: " + myPizza.getCost()); 
+                    scanner.close(); 
+                    return; 
+                default: 
+                    System.out.println("Invalid choice! Please select again."); 
+            } } } }
